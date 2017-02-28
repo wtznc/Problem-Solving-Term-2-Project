@@ -46,6 +46,11 @@
 
 	Move(A, table1, table2)
 
+	//The table with operators has to be generated dynamically, during the execution time
+	// Dla kazdego obiektu podanego, sprawdzic czy moge utworzyc operator
+	// Preconditions - ON(x, y), CLEAR(z), CLEAR(x), HEAVIER(z, x) 
+	// porownuje obiekt 
+
 
 	problem = {
 		"initial_state": ["A ON table1", "table1 HEAVIER A", "table2 HEAVIER A", "A CLEAR", "table2 CLEAR"],
@@ -53,7 +58,7 @@
 		"operators": [
 		{
 			"action": "MOVE A table1 table2"
-			"preconditions": "A ON table1", "A CLEAR", "table2 HEAVIER A"
+			"preconditions": "A ON table1", "table2 CLEAR", "A CLEAR", "table2 HEAVIER A"
 			"add": "A ON table2", "table1 CLEAR"
 			"delete": "A ON table1", "table2 CLEAR"
 		},
@@ -64,6 +69,26 @@
 			"delete":
 		},
 		]
+	}
+
+
+	problem = {
+	"initial_state": ["ON(A,table1)", "HEAVIER(table1, A)", "HEAVIER(table2, A"), "CLEAR(A)", "CLEAR(table2)"]
+	"goal_state": ["CLEAR(table1)", "CLEAR(A)"]
+	"operators": [
+	{
+		"action": "Move(A,table1,table2)"
+		"preconditions": "ON(A,table1)", "CLEAR(table2)", "CLEAR(x)", "HEAVIER(table2,A)"
+		"add": "ON(A,table2)", "CLEAR(table1)"
+		"delete": "ON(A,table1)", "CLEAR(z)"
+	},
+	{
+			"action": 
+			"preconditions":
+			"add":
+			"delete":
+	}
+	]
 	}
 '''
 
