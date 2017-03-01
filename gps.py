@@ -46,77 +46,120 @@
 
 	Move(A, table1, table2)
 
-	//The table with operators has to be generated dynamically, during the execution time
-	// Dla kazdego obiektu podanego, sprawdzic czy moge utworzyc operator
-	// Preconditions - ON(x, y), CLEAR(z), CLEAR(x), HEAVIER(z, x) 
-	// porownuje obiekt 
-
-
-	problem = {
-		"initial_state": ["A ON table1", "table1 HEAVIER A", "table2 HEAVIER A", "A CLEAR", "table2 CLEAR"],
-		"goal": ["table1 CLEAR", "A CLEAR"]
+abc = {
+		"initial_state": ["ON(A,table1)", "HEAVIER(table1, A)", "HEAVIER(table2, A)", "CLEAR(A)", "CLEAR(table2)"],
+		"goal_state": ["CLEAR(table1)", "CLEAR(A)"],
 		"operators": [
 		{
-			"action": "MOVE A table1 table2"
-			"preconditions": "A ON table1", "table2 CLEAR", "A CLEAR", "table2 HEAVIER A"
-			"add": "A ON table2", "table1 CLEAR"
-			"delete": "A ON table1", "table2 CLEAR"
-		},
-		{
-			"action": 
-			"preconditions":
-			"add":
-			"delete":
-		},
-		]
-	}
-
-
-	problem = {
-	"initial_state": ["ON(A,table1)", "HEAVIER(table1, A)", "HEAVIER(table2, A"), "CLEAR(A)", "CLEAR(table2)"]
-	"goal_state": ["CLEAR(table1)", "CLEAR(A)"]
-	"operators": [
-	{
-		"action": "Move(A,table1,table2)"
-		"preconditions": "ON(A,table1)", "CLEAR(table2)", "CLEAR(x)", "HEAVIER(table2,A)"
-		"add": "ON(A,table2)", "CLEAR(table1)"
-		"delete": "ON(A,table1)", "CLEAR(z)"
-	},
-	{
-			"action": 
-			"preconditions":
-			"add":
-			"delete":
-	}
-	]
+			"action": "Move(A,table1,table2)",
+			"preconditions": ["ON(A,table1)", "CLEAR(table2)", "CLEAR(A)", "HEAVIER(table2,A)"],
+			"add": ["ON(A,table2)", "CLEAR(table1)"],
+			"delete": ["ON(A,table1)", "CLEAR(z)"]
+		},{
+			"action": "Move(A,table1,table2)",
+			"preconditions": ["ON(A,table1)", "CLEAR(table2)", "CLEAR(A)", "HEAVIER(table2,A)"],
+			"add": ["ON(A,table2)", "CLEAR(table1)"],
+			"delete": ["ON(A,table1)", "CLEAR(z)"]
+		}]
 	}
 '''
 
-obj = raw_input("Please enter object names: ")
-objects = obj.split()
 
-for x in range (0, len(objects)):
-	print("Object = " + objects[x])
+''' 
+Class: Operator
+----------------------------------------------------------------------------------------
+Stores the details of our operators
+'''
+class Operator(object):
+	def __init__(self, action, preconditions, add, delete):
+		self.action = action
+		self.preconditions = preconditions
+		self.add = add
+		self.delete = delete
+
+'''
+Class: Property
+----------------------------------------------------------------------------------------
+Class for storing details of propositions
+'''
+class Property(object):
+	def __init__(self, proposition, obj1, obj2):
+		self.proposition = proposition
+		self.obj1 = obj1
+		self.obj2 = obj2
+
+''' 
+Function: getDataFromUser()
+-----------------------------------------------------------------------------------------
+Asks user to enter objects names, initial state and goal state. 
+The data is being parsed and chop up into small objects.
+'''
+def getDataFromUser():
+	obj = raw_input("Please enter object names: ")
+	objects = obj.split()
+	for x in range (0, len(objects)):
+		print("Object = " + objects[x])
+
+	state = raw_input("Please enter the initial state: ")
+	current_state = state.split()
+	for x in range(0, len(current_state)):
+		print("State = " + current_state[x])
+
+	goal = raw_input("Please enter the goal state: ")
+	goal_state = goal.split()
+	for x in range(0, len(goal_state)):
+		print("Goal state = " + goal_state[x])
+
+	#print(abc["operators"][0]['add'][1])
+	a = Operator('chujchuj', 'chujchuj', 'dsadsa', 'dsdsad')
+	print(a.action)
+
+	test = {
+			"initial_state": ["ON(A,table1)", "HEAVIER(table1, A)", "HEAVIER(table2, A)", "CLEAR(A)", "CLEAR(table2)"],
+			"goal_state": ["CLEAR(table1)", "CLEAR(A)"],
+			"operators": [Operator('asda', 'dsadsa', 'dsadsa', 'dsdsad'),
+							Operator('asda', 'dsadsa', 'dsadsa', 'dsdsad'),
+							Operator('asda', 'dsadsa', 'dsadsa', 'dsdsad'),
+							Operator('asda', 'dsadsa', 'dsadsa', 'dsdsad'),
+							Operator('asda', 'dsadsa', 'dsadsa', 'dsdsad')]
+		}
+
+	print(test['operators'][0].add)
+	test['operators'].append(a)
+	print(test['operators'][5].action)
+	print(type(test))
 
 
-state = raw_input("Please enter the initial state: ")
-current_state = state.split()
 
-for x in range(0, len(current_state)):
-	print("State = " + current_state[x])
 
-goal = raw_input("Please enter the goal state: ")
-goal_state = goal.split()
 
-for x in range(0, len(goal_state)):
-	print("Goal state = " + goal_state[x])
+''' 
+Generating the operators
+Do wygenerowania operatora potrzebuje spelnione preconditions
+Do kazdego podanego obiektu musze sprawdzic go ze stanem poczatkowym (czy znajduje sie na jakims obiekcie)
 
-problem = "problem = { \n\"initial_state\"😞"
-for x in range(0, len(current_state)):
-	problem += "\"" + current_state[x] + "\","
+'''
 
-problem += "]\n\"goal\": ["
-for x in range(0, len(goal_state)):
-	problem += "\"" + goal_state[x] + "\","
 
-print(problem)
+
+
+
+
+
+
+
+
+
+'''
+Function: main()
+-------------------------------------------------------------------------------------------
+The main function is called at program startup, 
+it is the designated entry point to a program that is executed in hosted environment.
+'''
+def main():
+	print("abc")
+	getDataFromUser()
+
+if __name__ == "__main__":
+	main()
+
