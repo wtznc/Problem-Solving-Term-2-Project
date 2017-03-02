@@ -83,10 +83,11 @@ Class: Property
 Class for storing details of propositions
 '''
 class Property(object):
-	def __init__(self, proposition, obj1, obj2):
-		self.proposition = proposition
+	def __init__(self, preposition, obj1, obj2):
+		self.preposition = preposition
 		self.obj1 = obj1
 		self.obj2 = obj2
+
 
 ''' 
 Function: getDataFromUser()
@@ -94,40 +95,6 @@ Function: getDataFromUser()
 Asks user to enter objects names, initial state and goal state. 
 The data is being parsed and chop up into small objects.
 '''
-def getDataFromUser():
-	obj = raw_input("Please enter object names: ")
-	objects = obj.split()
-	for x in range (0, len(objects)):
-		print("Object = " + objects[x])
-
-	state = raw_input("Please enter the initial state: ")
-	current_state = state.split()
-	for x in range(0, len(current_state)):
-		print("State = " + current_state[x])
-
-	goal = raw_input("Please enter the goal state: ")
-	goal_state = goal.split()
-	for x in range(0, len(goal_state)):
-		print("Goal state = " + goal_state[x])
-
-	#print(abc["operators"][0]['add'][1])
-	a = Operator('chujchuj', 'chujchuj', 'dsadsa', 'dsdsad')
-	print(a.action)
-
-	test = {
-			"initial_state": ["ON(A,table1)", "HEAVIER(table1, A)", "HEAVIER(table2, A)", "CLEAR(A)", "CLEAR(table2)"],
-			"goal_state": ["CLEAR(table1)", "CLEAR(A)"],
-			"operators": [Operator('asda', 'dsadsa', 'dsadsa', 'dsdsad'),
-							Operator('asda', 'dsadsa', 'dsadsa', 'dsdsad'),
-							Operator('asda', 'dsadsa', 'dsadsa', 'dsdsad'),
-							Operator('asda', 'dsadsa', 'dsadsa', 'dsdsad'),
-							Operator('asda', 'dsadsa', 'dsadsa', 'dsdsad')]
-		}
-
-	print(test['operators'][0].add)
-	test['operators'].append(a)
-	print(test['operators'][5].action)
-	print(type(test))
 
 
 
@@ -157,8 +124,106 @@ The main function is called at program startup,
 it is the designated entry point to a program that is executed in hosted environment.
 '''
 def main():
-	print("abc")
-	getDataFromUser()
+	'''
+	Global variables:
+	-------------------------------------------------------------------------------------
+	problem - contains initial state, goal state and operators 
+	'''
+	temp_obj = "table1 table2 A"
+	temp_state = "ON(A,table1) HEAVIER(table1,A) HEAVIER(table2,A) CLEAR(A) CLEAR(table2)"
+	temp_goal = "CLEAR(table1) CLEAR(A)"
+
+	problem = {	"objects": [],
+				"initial_state": [],
+				"goal_state": [],
+				"operators": []}
+
+	'''
+    Temporarily access data from variables
+	obj = raw_input("Please enter object names: ")
+	problem['objects'] = obj.split()
+
+	state = raw_input("Please enter the initial state: ")
+	problem['initial_state'] = state.split()
+
+	goal = raw_input("Please enter the goal state: ")
+	problem['goal_state'] = goal.split()
+	'''
+
+	problem['objects'] = temp_obj.split()
+	problem['initial_state'] = temp_state.split()
+	problem['goal_state'] = temp_goal.split()
+
+
+	#a = Operator('chujchuj', 'chujchuj', 'dsadsa', 'dsdsad')
+	#print(a.action)
+
+
+
+	print(problem)
+
+	for x in range(0, len(problem['initial_state'])):
+		par2 = "" # This parameter is optional, it may or may not exist
+		tempState = problem['initial_state'][x]
+		temp_pos1 = tempState.find("(")
+		temp_pos2 = tempState.find(",")
+		temp_pos3 = tempState.find(")")
+		preposition = tempState[:temp_pos1]
+		if tempState.find(",") == -1:
+			par1 = tempState[temp_pos1+1:temp_pos3]
+		else:
+			par1 = tempState[temp_pos1+1: temp_pos2]
+			par2 = tempState[temp_pos2+1:temp_pos3]
+		property = Property(preposition, par1, par2)
+		problem['initial_state'][x] = property
+	print(problem['initial_state'][1].obj2)
+
+
+
+
+
+	#for each goal state, check the initial state and then look through the operators list 
+	#and find actions which will add goal state to the current state  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 if __name__ == "__main__":
 	main()
