@@ -96,6 +96,16 @@ class Property(object):
 		self.obj1 = obj1
 		self.obj2 = obj2
 
+		'''
+				Found on StackOverflow -> compares two object instances
+				http://stackoverflow.com/questions/1227121/compare-object-instances-for-equality-by-their-attributes-in-python
+		'''
+		def __str__(self):
+			return str(self.__dict__)
+
+    	def __eq__(self, other): 
+    		return self.__dict__ == other.__dict__
+
 
 ''' 
 Function: splitStringsIntoProperties(object)
@@ -132,8 +142,8 @@ def main():
 	-------------------------------------------------------------------------------------
 	problem - contains objects, initial state, goal state and operators 
 	'''
-	temp_obj = "table1 table2 A"
-	temp_state = "ON(A,table1) HEAVIER(table1,A) HEAVIER(table2,A) CLEAR(A) CLEAR(table2)"
+	temp_obj = "table1 table2 A table3 table4 B"
+	temp_state = "ON(A,table1) HEAVIER(table1,A) HEAVIER(table2,A) CLEAR(A) CLEAR(table2) ON(B,table3) HEAVIER(table3,B) HEAVIER(table4,B) CLEAR(B) CLEAR(table4)"
 	temp_goal = "CLEAR(table1) CLEAR(A)"
 
 	problem = {	"objects": [],
@@ -157,32 +167,17 @@ def main():
 	problem['initial_state'] = temp_state.split()
 	problem['goal_state'] = temp_goal.split()
 
-
-	#a = Operator('chujchuj', 'chujchuj', 'dsadsa', 'dsdsad')
-	#print(a.action)
-
 	splitStringsIntoProperties(problem['initial_state'])
 	splitStringsIntoProperties(problem['goal_state'])
 
 
-	print(problem['initial_state'][1].obj2)
-	print(problem['goal_state'][0].preposition)
-
-	print(problem)
-	print("\n")
-
-	#for each goal state, check the initial state and then look through the operators list 
-	#and find actions which will add goal state to the current state  
-
-
-
-	#"initial_state": ["ON(A,table1)", "HEAVIER(table1, A)", "HEAVIER(table2, A)", "CLEAR(A)", "CLEAR(table2)"],
-	#wziac pierwszy parametr z initial state ktore maja preposition ON i sprawdzac dla innych
-
+	'''
+		Check preconditions and generate operators
+	'''
 	lengthOfObjectsInProblemDict = len(problem['objects'])
 	lengthOfStatesInProblemDict = len(problem['initial_state'])
 	heavierFirstObject = ""
-	#check preconditions and build operators
+
 	for a in range (0, lengthOfObjectsInProblemDict): #for each object in objects list, check preconditions required to perform the move action
 		for b in range(0, lengthOfStatesInProblemDict):
 			if problem['initial_state'][b].preposition == "ON" and problem['initial_state'][b].obj1 == problem['objects'][a]:
@@ -211,15 +206,27 @@ def main():
 
 
 
-	print(problem)
+'''
+	Remove states from the goal_state which are already inside the initial_state
+'''
+	indexesOfElementsToDelete = []	
+	for x in range(0, len(problem['goal_state'])):
+		for y in range(0, len(problem['initial_state'])):
+			if problem['initial_state'][y] == problem['goal_state'][x]:
+				print("Same!!!")
+				indexesOfElementsToDelete.append(x)
+
+	for x in range(0, len(indexesOfElementsToDelete)):
+		del problem['goal_state'][indexesOfElementsToDelete[x]]
 
 
 
 
+	print("Length of goal state after removing: ", len(problem['goal_state']))
+	for x in range(0, len(problem['goal_state'])):
+		print problem['goal_state'][x].obj1
 
-
-
-
+	#print(problem['operators'][0].add[0].preposition)	
 
 
 
