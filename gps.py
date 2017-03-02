@@ -1,12 +1,12 @@
 '''
 	Problem Solving for Computer Science - Assignment
 	Wojciech Tyziniec 2017
-	Goldsmiths, University of London
+	Goldsmiths, University of London {
 
 
 	INTRODUCTION
 	----------------------------------------------------------------------------------------
-
+}
 	Consider a Toy world, containing a finite number n of objects.
 	Each object is specified by a unique name.
 
@@ -65,7 +65,15 @@ abc = {
 '''
 
 
+
+
+
+'''
+					SOLUTION
+___________________________________________________
 ''' 
+
+'''
 Class: Operator
 ----------------------------------------------------------------------------------------
 Stores the details of our operators
@@ -90,31 +98,26 @@ class Property(object):
 
 
 ''' 
-Function: getDataFromUser()
+Function: splitStringsIntoProperties(object)
 -----------------------------------------------------------------------------------------
-Asks user to enter objects names, initial state and goal state. 
-The data is being parsed and chop up into small objects.
+The object is being parsed and chop up into small objects.
 '''
-
-
-
-
-
-''' 
-Generating the operators
-Do wygenerowania operatora potrzebuje spelnione preconditions
-Do kazdego podanego obiektu musze sprawdzic go ze stanem poczatkowym (czy znajduje sie na jakims obiekcie)
-
-'''
-
-
-
-
-
-
-
-
-
+def splitStringsIntoProperties(object):
+	stringToSplit = object
+	for x in range(0, len(object)):
+		par2 = "" #Optional parameter - it may or may not exist
+		tempState = stringToSplit[x]
+		temp_pos1 = tempState.find("(")
+		temp_pos2 = tempState.find(",")
+		temp_pos3 = tempState.find(")")
+		preposition = tempState[:temp_pos1]
+		if tempState.find(",") == -1:
+			par1 = tempState[temp_pos1+1:temp_pos3]
+		else:
+			par1 = tempState[temp_pos1+1: temp_pos2]
+			par2 = tempState[temp_pos2+1:temp_pos3]
+		property = Property(preposition, par1, par2)
+		object[x] = property
 
 
 '''
@@ -127,7 +130,7 @@ def main():
 	'''
 	Global variables:
 	-------------------------------------------------------------------------------------
-	problem - contains initial state, goal state and operators 
+	problem - contains objects, initial state, goal state and operators 
 	'''
 	temp_obj = "table1 table2 A"
 	temp_state = "ON(A,table1) HEAVIER(table1,A) HEAVIER(table2,A) CLEAR(A) CLEAR(table2)"
@@ -158,46 +161,57 @@ def main():
 	#a = Operator('chujchuj', 'chujchuj', 'dsadsa', 'dsdsad')
 	#print(a.action)
 
+	splitStringsIntoProperties(problem['initial_state'])
+	splitStringsIntoProperties(problem['goal_state'])
 
+
+	print(problem['initial_state'][1].obj2)
+	print(problem['goal_state'][0].preposition)
 
 	print(problem)
-
-	for x in range(0, len(problem['initial_state'])):
-		par2 = "" # This parameter is optional, it may or may not exist
-		tempState = problem['initial_state'][x]
-		temp_pos1 = tempState.find("(")
-		temp_pos2 = tempState.find(",")
-		temp_pos3 = tempState.find(")")
-		preposition = tempState[:temp_pos1]
-		if tempState.find(",") == -1:
-			par1 = tempState[temp_pos1+1:temp_pos3]
-		else:
-			par1 = tempState[temp_pos1+1: temp_pos2]
-			par2 = tempState[temp_pos2+1:temp_pos3]
-		property = Property(preposition, par1, par2)
-		problem['initial_state'][x] = property
-	print(problem['initial_state'][1].obj2)
-
-
-
-
+	print("\n")
 
 	#for each goal state, check the initial state and then look through the operators list 
 	#and find actions which will add goal state to the current state  
 
 
 
+	#"initial_state": ["ON(A,table1)", "HEAVIER(table1, A)", "HEAVIER(table2, A)", "CLEAR(A)", "CLEAR(table2)"],
+	#wziac pierwszy parametr z initial state ktore maja preposition ON i sprawdzac dla innych
+
+	lengthOfObjectsInProblemDict = len(problem['objects'])
+	lengthOfStatesInProblemDict = len(problem['initial_state'])
+	heavierFirstObject = ""
+	#check preconditions and build operators
+	for a in range (0, lengthOfObjectsInProblemDict): #for each object in objects list, check preconditions required to perform the move action
+		for b in range(0, lengthOfStatesInProblemDict):
+			if problem['initial_state'][b].preposition == "ON" and problem['initial_state'][b].obj1 == problem['objects'][a]:
+				precondProperty1 = Property(problem['initial_state'][b].preposition, problem['initial_state'][b].obj1, problem['initial_state'][b].obj2)
+				for c in range(0, lengthOfStatesInProblemDict):
+					if(problem['initial_state'][c].preposition == "CLEAR" and problem['initial_state'][c].obj1 == problem['objects'][a]): #third condition if object = x and CLEAR(x)
+						precondProperty3 = Property(problem['initial_state'][c].preposition, problem['initial_state'][c].obj1, "")
+						for d in range(0, lengthOfStatesInProblemDict):
+							if(problem['initial_state'][d].preposition == "HEAVIER" and problem['initial_state'][d].obj2 == problem['objects'][a]): #fourth condition
+								heavierFirstObject = problem['initial_state'][d].obj1
+								precondProperty4 = Property(problem['initial_state'][d].preposition, heavierFirstObject, problem['objects'][a])
+								for e in range(0, lengthOfStatesInProblemDict):
+									if(problem['initial_state'][e].preposition == "CLEAR" and problem['initial_state'][e].obj1 == heavierFirstObject): #second
+										precondProperty2 = Property(problem['initial_state'][e].preposition, heavierFirstObject, "")
+										print("Preconditions success for object nr: ", a)
+										#print("first Precond property = ", precondProperty1.preposition, precondProperty1.obj1, precondProperty1.obj2)
+										#print("second Precond property = ", precondProperty2.preposition, precondProperty2.obj1, precondProperty2.obj2)
+										#print("third Precond property = ", precondProperty3.preposition, precondProperty3.obj1, precondProperty3.obj2)
+										#print("fourth Precond property = ", precondProperty4.preposition, precondProperty4.obj1, precondProperty4.obj2)
+										op = Operator(["Move",precondProperty1.obj1, precondProperty1.obj2, precondProperty2.obj1], 
+											[precondProperty1, precondProperty2, precondProperty3, precondProperty4], 
+											[Property(precondProperty1.preposition, precondProperty1.obj1, precondProperty2.obj1), Property(precondProperty2.preposition, precondProperty1.obj2, "")],
+											[Property(precondProperty1.preposition, precondProperty1.obj1, precondProperty1.obj2), Property(precondProperty2.preposition, precondProperty2.obj1, "")])
+										problem['operators'].append(op)
 
 
 
 
-
-
-
-
-
-
-
+	print(problem)
 
 
 
