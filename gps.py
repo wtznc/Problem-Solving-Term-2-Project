@@ -47,7 +47,7 @@
 	Move(A, table1, table2)
 
 abc = {
-		"initial_state": ["ON(A,table1)", "HEAVIER(table1, A)", "HEAVIER(table2, A)", "CLEAR(A)", "CLEAR(table2)"],
+		"current_state": ["ON(A,table1)", "HEAVIER(table1, A)", "HEAVIER(table2, A)", "CLEAR(A)", "CLEAR(table2)"],
 		"goal_state": ["CLEAR(table1)", "CLEAR(A)"],
 		"operators": [
 		{
@@ -69,11 +69,6 @@ abc = {
 
 
 '''
-					SOLUTION
-___________________________________________________
-''' 
-
-'''
 Class: Operator
 ----------------------------------------------------------------------------------------
 Stores the details of our operators
@@ -84,6 +79,7 @@ class Operator(object):
 		self.preconditions = preconditions
 		self.add = add
 		self.delete = delete
+
 
 '''
 Class: Property
@@ -110,12 +106,12 @@ class Property(object):
 ''' 
 Function: splitStringsIntoProperties(object)
 -----------------------------------------------------------------------------------------
-The object is being parsed and chop up into small objects.
+In this function the object (input from the user) is being parsed and chop up into small objects (Property).
 '''
 def splitStringsIntoProperties(object):
 	stringToSplit = object
 	for x in range(0, len(object)):
-		par2 = "" #Optional parameter - it may or may not exist
+		par2 = "" # This variable is prepared for optional parameter - it may or may not exist
 		tempState = stringToSplit[x]
 		temp_pos1 = tempState.find("(")
 		temp_pos2 = tempState.find(",")
@@ -140,14 +136,14 @@ def main():
 	'''
 	Global variables:
 	-------------------------------------------------------------------------------------
-	problem - contains objects, initial state, goal state and operators 
+	problem - contains objects, current state, goal state and operators 
 	'''
-	temp_obj = "table1 table2 A table3 table4 B"
-	temp_state = "ON(A,table1) HEAVIER(table1,A) HEAVIER(table2,A) CLEAR(A) CLEAR(table2) ON(B,table3) HEAVIER(table3,B) HEAVIER(table4,B) CLEAR(B) CLEAR(table4)"
-	temp_goal = "CLEAR(table1) CLEAR(A)"
+	temp_obj = "table1 table2 A table3 table4 B table5"
+	temp_state = "ON(A,table1) HEAVIER(table1,A) HEAVIER(table2,A) CLEAR(A) CLEAR(table5) HEAVIER(table5, A) CLEAR(table2) ON(B,table3) HEAVIER(table3,B) HEAVIER(table4,B) CLEAR(B) CLEAR(table4)"
+	temp_goal = "ON(A,table2) CLEAR(table2)"
 
 	problem = {	"objects": [],
-				"initial_state": [],
+				"current_state": [],
 				"goal_state": [],
 				"operators": []}
 
@@ -157,17 +153,17 @@ def main():
 	problem['objects'] = obj.split()
 
 	state = raw_input("Please enter the initial state: ")
-	problem['initial_state'] = state.split()
+	problem['current_state'] = state.split()
 
 	goal = raw_input("Please enter the goal state: ")
 	problem['goal_state'] = goal.split()
 	'''
 
 	problem['objects'] = temp_obj.split()
-	problem['initial_state'] = temp_state.split()
+	problem['current_state'] = temp_state.split()
 	problem['goal_state'] = temp_goal.split()
 
-	splitStringsIntoProperties(problem['initial_state'])
+	splitStringsIntoProperties(problem['current_state'])
 	splitStringsIntoProperties(problem['goal_state'])
 
 
@@ -175,23 +171,23 @@ def main():
 		Check preconditions and generate operators
 	'''
 	lengthOfObjectsInProblemDict = len(problem['objects'])
-	lengthOfStatesInProblemDict = len(problem['initial_state'])
+	lengthOfStatesInProblemDict = len(problem['current_state'])
 	heavierFirstObject = ""
 
 	for a in range (0, lengthOfObjectsInProblemDict): #for each object in objects list, check preconditions required to perform the move action
 		for b in range(0, lengthOfStatesInProblemDict):
-			if problem['initial_state'][b].preposition == "ON" and problem['initial_state'][b].obj1 == problem['objects'][a]:
-				precondProperty1 = Property(problem['initial_state'][b].preposition, problem['initial_state'][b].obj1, problem['initial_state'][b].obj2)
+			if problem['current_state'][b].preposition == "ON" and problem['current_state'][b].obj1 == problem['objects'][a]:
+				precondProperty1 = Property(problem['current_state'][b].preposition, problem['current_state'][b].obj1, problem['current_state'][b].obj2)
 				for c in range(0, lengthOfStatesInProblemDict):
-					if(problem['initial_state'][c].preposition == "CLEAR" and problem['initial_state'][c].obj1 == problem['objects'][a]): #third condition if object = x and CLEAR(x)
-						precondProperty3 = Property(problem['initial_state'][c].preposition, problem['initial_state'][c].obj1, "")
+					if(problem['current_state'][c].preposition == "CLEAR" and problem['current_state'][c].obj1 == problem['objects'][a]): #third condition if object = x and CLEAR(x)
+						precondProperty3 = Property(problem['current_state'][c].preposition, problem['current_state'][c].obj1, "")
 						for d in range(0, lengthOfStatesInProblemDict):
-							if(problem['initial_state'][d].preposition == "HEAVIER" and problem['initial_state'][d].obj2 == problem['objects'][a]): #fourth condition
-								heavierFirstObject = problem['initial_state'][d].obj1
-								precondProperty4 = Property(problem['initial_state'][d].preposition, heavierFirstObject, problem['objects'][a])
+							if(problem['current_state'][d].preposition == "HEAVIER" and problem['current_state'][d].obj2 == problem['objects'][a]): #fourth condition
+								heavierFirstObject = problem['current_state'][d].obj1
+								precondProperty4 = Property(problem['current_state'][d].preposition, heavierFirstObject, problem['objects'][a])
 								for e in range(0, lengthOfStatesInProblemDict):
-									if(problem['initial_state'][e].preposition == "CLEAR" and problem['initial_state'][e].obj1 == heavierFirstObject): #second
-										precondProperty2 = Property(problem['initial_state'][e].preposition, heavierFirstObject, "")
+									if(problem['current_state'][e].preposition == "CLEAR" and problem['current_state'][e].obj1 == heavierFirstObject): #second
+										precondProperty2 = Property(problem['current_state'][e].preposition, heavierFirstObject, "")
 										print("Preconditions success for object nr: ", a)
 										#print("first Precond property = ", precondProperty1.preposition, precondProperty1.obj1, precondProperty1.obj2)
 										#print("second Precond property = ", precondProperty2.preposition, precondProperty2.obj1, precondProperty2.obj2)
@@ -202,18 +198,16 @@ def main():
 											[Property(precondProperty1.preposition, precondProperty1.obj1, precondProperty2.obj1), Property(precondProperty2.preposition, precondProperty1.obj2, "")],
 											[Property(precondProperty1.preposition, precondProperty1.obj1, precondProperty1.obj2), Property(precondProperty2.preposition, precondProperty2.obj1, "")])
 										problem['operators'].append(op)
+										print("Operator added to the list ", op)
 
 
-
-
-'''
-	Remove states from the goal_state which are already inside the initial_state
-'''
+	'''
+	Remove the elements from goal_state which are already inside the current_state
+	'''
 	indexesOfElementsToDelete = []	
 	for x in range(0, len(problem['goal_state'])):
-		for y in range(0, len(problem['initial_state'])):
-			if problem['initial_state'][y] == problem['goal_state'][x]:
-				print("Same!!!")
+		for y in range(0, len(problem['current_state'])):
+			if problem['current_state'][y] == problem['goal_state'][x]:
 				indexesOfElementsToDelete.append(x)
 
 	for x in range(0, len(indexesOfElementsToDelete)):
@@ -221,29 +215,24 @@ def main():
 
 
 
-
-	print("Length of goal state after removing: ", len(problem['goal_state']))
+	asd = 0
 	for x in range(0, len(problem['goal_state'])):
-		print problem['goal_state'][x].obj1
-
-	#print(problem['operators'][0].add[0].preposition)	
-
-
-
-
-
-
+		for y in range(0, len(problem['operators'])):
+			for z in range(0, len(problem['operators'][y].add)):
+				if (problem['operators'][y].add[z].preposition == problem['goal_state'][x].preposition) and (problem['operators'][y].add[z].obj1 == problem['goal_state'][x].obj1) and (problem['operators'][y].add[z].obj2 == problem['goal_state'][x].obj2):
+					print("I found operator which can solve your problem!")
+					print("To achieve your goals you have to: " + problem['operators'][y].action[0] + " " + problem['operators'][y].action[1] + " " + problem['operators'][y].action[2] + " " + problem['operators'][y].action[3])
+				else:
+					print("Could not find the solution!")
 
 
-
-
-
-
-
-
-
-
-
+			'''
+			for z in range(0, len(problem['operators'][asd].add))
+			if (problem['operators'][y].add[z].preposition == problem['goal_state'][x].preposition) and 
+			(problem['operators'][y].add[z].obj1 == problem['goal_state'][x].obj1) and 
+			(problem['operators'][y].add[z].obj2 == problem['goal_state'][x].obj2):
+				print("I found operator which can solve your problem!")
+			'''
 
 
 if __name__ == "__main__":
