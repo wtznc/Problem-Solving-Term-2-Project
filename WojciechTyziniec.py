@@ -147,8 +147,7 @@ def main():
 	print("There are " + str(len(problem['goal_state'])) + " states left in the goal_state list.")
 	asda = 0
 	# Do while there are states in the goal_state list to be solved
-	#while problem['goal_state']:
-	while asda == 0:
+	while problem['goal_state']:
 		# Generate operators for current state
 		for a in range(0, len(problem['objects'])):		# For each element in the objects list
 			for b in range(0, len(problem['current_state'])):	# For each state in the current_state
@@ -176,19 +175,37 @@ def main():
 											problem['operators'].append(op)
 											print("Operator added to the list ", op.action)
 											print("\n")
-											if(len(problem['operators']) == 2):
-												asda = 1
+											
 
-											print("There are ", len(problem['operators']), " operators in the list")
-											for x in range(0, len(problem['goal_state'])): #for all goal states
-												for y in range(0, len(problem['operators'])): #look through all operators
-													for z in range(0, len(problem['operators'][y].add)): #and check if its property from add list is equal to property from the goal state
-														if (problem['operators'][y].add[z].preposition == problem['goal_state'][x].preposition) and (problem['operators'][y].add[z].obj1 == problem['goal_state'][x].obj1) and (problem['operators'][y].add[z].obj2 == problem['goal_state'][x].obj2):
-															print("I have found operator which can solve " + problem['goal_state'][x].preposition + " " + problem['goal_state'][x].obj1 + " " + problem['goal_state'][x].obj2 + " state from the goal_state!")
-															print("To achieve your goals you have to: " + problem['operators'][y].action[0] + " " + problem['operators'][y].action[1] + " " + problem['operators'][y].action[2] + " " + problem['operators'][y].action[3])
-															printCurrentState(problem)
-															problem['current_state'].append(problem['operators'][y].add[0])
-															problem['current_state'].append(problem['operators'][y].add[1])
+		print("There are ", len(problem['operators']), " operators in the list")
+		indexesOfGoalStatesToDelete = []
+		for x in range(0, len(problem['goal_state'])): #for all goal states
+			for y in range(0, len(problem['operators'])): #look through all operators
+				for z in range(0, len(problem['operators'][y].add)): #and check if its property from add list is equal to property from the goal state
+					if (problem['operators'][y].add[z].preposition == problem['goal_state'][x].preposition) and (problem['operators'][y].add[z].obj1 == problem['goal_state'][x].obj1) and (problem['operators'][y].add[z].obj2 == problem['goal_state'][x].obj2):
+						print("I have found operator which can solve " + problem['goal_state'][x].preposition + " " + problem['goal_state'][x].obj1 + " " + problem['goal_state'][x].obj2 + " state from the goal_state!")
+						print("To achieve your goals you have to: " + problem['operators'][y].action[0] + " " + problem['operators'][y].action[1] + " " + problem['operators'][y].action[2] + " " + problem['operators'][y].action[3])
+						print("Current state before taking action: ")
+						printCurrentState(problem)
+						problem['current_state'].append(problem['operators'][y].add[0])
+						problem['current_state'].append(problem['operators'][y].add[1])
+						indexesOfElementsToDelete = []	
+						for q in range(0, len(problem['current_state'])):
+							if problem['current_state'][q] == problem['operators'][y].delete[0] or problem['current_state'][q] == problem['operators'][y].delete[1]:
+								indexesOfElementsToDelete.append(q)
+
+						for index in sorted(indexesOfElementsToDelete, reverse=True):
+							del problem['current_state'][index]
+
+
+						print("\nCurrent state after taking action: ")
+						printCurrentState(problem)
+						indexesOfGoalStatesToDelete.append(x)
+
+
+
+		for index in sorted(indexesOfGoalStatesToDelete, reverse=True):
+			del problem['goal_state'][index]
 
 
 
