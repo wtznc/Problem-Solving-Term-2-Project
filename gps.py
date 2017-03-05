@@ -138,9 +138,9 @@ def main():
 	-------------------------------------------------------------------------------------
 	problem - contains objects, current state, goal state and operators 
 	'''
-	temp_obj = "table1 table2 A"
-	temp_state = "ON(A,table1) HEAVIER(table1,A) HEAVIER(table2,A) CLEAR(A) CLEAR(table2)"
-	temp_goal = "CLEAR(table1) CLEAR(A)"
+	temp_obj = "table1 table2 A table3 table4 B"
+	temp_state = "ON(A,table1) HEAVIER(table1,A) HEAVIER(table2,A) CLEAR(A) CLEAR(table2) ON(B,table3) HEAVIER(table3,B) HEAVIER(table4,B) CLEAR(B) CLEAR(table4)"
+	temp_goal = "CLEAR(table1) CLEAR(A) CLEAR(table3) CLEAR(B)"
 
 	problem = {	"objects": [],
 				"current_state": [],
@@ -167,28 +167,34 @@ def main():
 	splitStringsIntoProperties(problem['goal_state'])
 
 
-	'''
-		Check preconditions and generate operators
-	'''
-	lengthOfObjectsInProblemDict = len(problem['objects'])
-
-	lengthOfStatesInProblemDict = len(problem['current_state'])
-	heavierFirstObject = ""
+	
 
 
 	'''
 	Remove the elements from goal_state which are already inside the current_state
 	'''
+	print("There are " + str(len(problem['goal_state'])) + " states before comparing with current_state\n")
 	indexesOfElementsToDelete = []	
 	for x in range(0, len(problem['goal_state'])):
 		for y in range(0, len(problem['current_state'])):
 			if problem['current_state'][y] == problem['goal_state'][x]:
 				indexesOfElementsToDelete.append(x)
+				print("I have found state from goal_state which is included in the current_state list! I'm gonna remove it from the goal_state.")
 
-	for x in range(0, len(indexesOfElementsToDelete)):
-		del problem['goal_state'][indexesOfElementsToDelete[x]]
+	print("I should delete ", len(indexesOfElementsToDelete), " states.")
+	print("I should delete state nr: ", indexesOfElementsToDelete[0], " and state nr: ", indexesOfElementsToDelete[1])
+	for index in sorted(indexesOfElementsToDelete, reverse=True):
+		del problem['goal_state'][index]
+
+	print("There are " + str(len(problem['goal_state'])) + " states after comparing with current_state\n")
 
 
+	'''
+	Check preconditions and generate operators
+	'''
+	lengthOfObjectsInProblemDict = len(problem['objects'])
+	lengthOfStatesInProblemDict = len(problem['current_state'])
+	heavierFirstObject = ""
 	for a in range (0, lengthOfObjectsInProblemDict): #for each object in objects list, check preconditions required to perform the move action
 		for b in range(0, lengthOfStatesInProblemDict):
 			if problem['current_state'][b].preposition == "ON" and problem['current_state'][b].obj1 == problem['objects'][a]:
@@ -203,17 +209,18 @@ def main():
 								for e in range(0, lengthOfStatesInProblemDict):
 									if(problem['current_state'][e].preposition == "CLEAR" and problem['current_state'][e].obj1 == heavierFirstObject): #second
 										precondProperty2 = Property(problem['current_state'][e].preposition, heavierFirstObject, "")
-										print("Preconditions success for object nr: ", a)
-										#print("first Precond property = ", precondProperty1.preposition, precondProperty1.obj1, precondProperty1.obj2)
-										#print("second Precond property = ", precondProperty2.preposition, precondProperty2.obj1, precondProperty2.obj2)
-										#print("third Precond property = ", precondProperty3.preposition, precondProperty3.obj1, precondProperty3.obj2)
-										#print("fourth Precond property = ", precondProperty4.preposition, precondProperty4.obj1, precondProperty4.obj2)
+										print("Preconditions are fulfilled for object nr: ", a, ". I can create new Move operator for object: ", problem['objects'][a])
+										print("first Precond property = ", precondProperty1.preposition, precondProperty1.obj1, precondProperty1.obj2)
+										print("second Precond property = ", precondProperty2.preposition, precondProperty2.obj1, precondProperty2.obj2)
+										print("third Precond property = ", precondProperty3.preposition, precondProperty3.obj1, precondProperty3.obj2)
+										print("fourth Precond property = ", precondProperty4.preposition, precondProperty4.obj1, precondProperty4.obj2)
 										op = Operator(["Move",precondProperty1.obj1, precondProperty1.obj2, precondProperty2.obj1], #from X on Y to Z
 											[precondProperty1, precondProperty2, precondProperty3, precondProperty4], 
 											[Property(precondProperty1.preposition, precondProperty1.obj1, precondProperty2.obj1), Property(precondProperty2.preposition, precondProperty1.obj2, "")],
 											[Property(precondProperty1.preposition, precondProperty1.obj1, precondProperty1.obj2), Property(precondProperty2.preposition, precondProperty2.obj1, "")])
 										problem['operators'].append(op)
-										print("Operator added to the list ", op)
+										print("Operator added to the list ", op.action)
+										print("\n")
 
 
 
@@ -232,14 +239,12 @@ def main():
 		for y in range(0, len(problem['operators'])): #look through all operators
 			for z in range(0, len(problem['operators'][y].add)): #and check if its property from add list is equal to property from the goal state
 				if (problem['operators'][y].add[z].preposition == problem['goal_state'][x].preposition) and (problem['operators'][y].add[z].obj1 == problem['goal_state'][x].obj1) and (problem['operators'][y].add[z].obj2 == problem['goal_state'][x].obj2):
-					print("I found operator which can solve " + problem['goal_state'][x].preposition + " " + problem['goal_state'][x].obj1 + " " + problem['goal_state'][x].obj2 + " state from the goal_state!")
+					print("I have found operator which can solve " + problem['goal_state'][x].preposition + " " + problem['goal_state'][x].obj1 + " " + problem['goal_state'][x].obj2 + " state from the goal_state!")
 					print("To achieve your goals you have to: " + problem['operators'][y].action[0] + " " + problem['operators'][y].action[1] + " " + problem['operators'][y].action[2] + " " + problem['operators'][y].action[3])
 					'''
 					Execute that action -> add and delete states to and from the current_state
 					'''
 
-				else:
-					print("Could not find another solution!")
 
 
 
