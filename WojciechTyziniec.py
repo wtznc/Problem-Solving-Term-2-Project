@@ -44,7 +44,11 @@
 
 
 	Move(A, table1, table2) - moves object A from table1 to table2
+
 '''
+
+
+# Uncomment all  print() commands to turn on a "debugging mode" :).
 
 '''
 Class: Operator(object)
@@ -63,7 +67,7 @@ class Operator(object):
 Class: Property(object)
 ----------------------------------------------------------------------------------------
 Class for storing details of prepositions
-Variable 'obj2' is optional. Our operator may require only one operator - e.g. CLEAR(x) vs HEAVIER(x, y). Its default value is set to be - "".
+Variable 'obj2' is optional. Our operators may require only one parameter - e.g. CLEAR(x) vs HEAVIER(x, y). Its default value is set to be - "".
 '''
 
 class Property(object):
@@ -72,16 +76,24 @@ class Property(object):
 		self.obj1 = obj1
 		self.obj2 = obj2
 
-		'''
-		Found on StackOverflow -> compares two object instances
-		http://stackoverflow.com/questions/1227121/compare-object-instances-for-equality-by-their-attributes-in-python
-		'''
-		def __str__(self):
-			return str(self.__dict__)
 
-    	def __eq__(self, other): 
-    		return self.__dict__ == other.__dict__
-
+'''
+Function: compareTwoObjects(object1, object2):
+----------------------------------------------------------------------------------------
+This function compares two Property objects and returns True if they are the same, or False when they are different.
+Created as a replacement for the code found on Stack Overflow.
+http://stackoverflow.com/questions/1227121/compare-object-instances-for-equality-by-their-attributes-in-python
+'''
+def compareTwoObjects(object1, object2):
+		if type(object1) != type(object2):
+			return False
+		if type(object1) == Property and type(object2) == Property:
+			if object1.preposition == object2.preposition and object1.obj1 == object2.obj1 and object1.obj2 == object2.obj2:
+				return True
+			else:
+				return False
+		else:
+			return False
 
 '''
 Function: printCurrentState(object):
@@ -91,7 +103,6 @@ Helper function which prints out the content of problem['current_state'] list
 def printCurrentState(object):
 	for x in range(0, len(object['current_state'])):
 		print("Current state = " + object['current_state'][x].preposition + " " + object['current_state'][x].obj1  + " " + object['current_state'][x].obj2)
-
 
 '''
 Function: printOperators(object):
@@ -124,11 +135,10 @@ def splitInputStringIntoProperties(object):
 		property = Property(preposition, obj1, obj2)
 		object[x] = property # Replace string with created property
 
-
 '''
 Function: getInputFromUserAndSaveInsideProblemDictionary(object)
 ----------------------------------------------------------------------------------------
-I think the function name explains everything.
+Hmmm, the function name explains everything.
 '''
 
 def getInputFromUserAndSaveInsideProblemDictionary(object):
@@ -143,7 +153,6 @@ def getInputFromUserAndSaveInsideProblemDictionary(object):
 	goal = raw_input("Please enter the goal state: ")
 	_problem['goal_state'] = goal.split()
 
-
 '''
 Function: applyOperator(operator, current_state)
 ----------------------------------------------------------------------------------------
@@ -151,28 +160,30 @@ Function performs action of executing operator in the current_state.
 It adds and deletes properties to and from the current_state.
 '''
 def applyOperator(operator, current_state):
-	print("Applying operator: ", operator.action)
+	# print("Applying operator: ", operator.action)
 	indexesOfElementsToDelete = []
+
 	# Adding two properties from the passed operator to the current_state
 	current_state.append(operator.add[0])
 	current_state.append(operator.add[1])
+
+	# Removing two properties from the current_state
 	for q in range(0, len(current_state)):
-		if current_state[q] == operator.delete[0] or current_state[q] == operator.delete[1]:
+		if compareTwoObjects(current_state[q], operator.delete[0]) == True or compareTwoObjects(current_state[q], operator.delete[1]) == True:
 			indexesOfElementsToDelete.append(q)
 
 	for index in sorted(indexesOfElementsToDelete, reverse=True):
 		del current_state[index]
 
-
-
 '''
 Function: generateOperatorsForCurrentState(objects, current_state, operators)
 ----------------------------------------------------------------------------------------
-Explanation later...
+Iterates through a list of objects and current_state and checks preconditions, 
+if all four preconditions are fulfilled, then it generates Move operator and adds to the problem['operators'] list.
 '''
 def generateOperatorsForCurrentState(objects, current_state, operators, reset):
-	print("Generating operators...")
-	# Reset current list of operators
+	# print("Generating operators...")
+	# Reset current list of operators (I want to have up-to-date operators for each state)
 	if reset == True:
 		for z in range(0, len(operators)):
 			del operators[0]
@@ -196,7 +207,7 @@ def generateOperatorsForCurrentState(objects, current_state, operators, reset):
 												[Property(preconditionProperty1.preposition, preconditionProperty1.obj1, preconditionProperty2.obj1), Property(preconditionProperty2.preposition, preconditionProperty1.obj2, "")],
 												[Property(preconditionProperty1.preposition, preconditionProperty1.obj1, preconditionProperty1.obj2), Property(preconditionProperty2.preposition, preconditionProperty2.obj1, "")])
 										operators.append(op)
-										print("Operator added to the list = ", op.action)
+										# print("Operator added to the list = ", op.action)
 
 '''
 Function: removeSolvedStatesFromTheGoalState(goal_state, current_state)
@@ -204,42 +215,42 @@ Function: removeSolvedStatesFromTheGoalState(goal_state, current_state)
 This function removes states from the goal_state list which are included in the current_state list.
 '''
 def removeSolvedStatesFromTheGoalState(goal_state, current_state):
-	print("There are " + str(len(goal_state)) + " states in the goal_state before comparing with current_state")
+	# print("There are " + str(len(goal_state)) + " states in the goal_state before comparing with current_state")
 	indexesOfElementsToDelete = []
 	for x in range(0, len(goal_state)):
 		for y in range(0, len(current_state)):
-			if current_state[y] == goal_state[x]:
+			if compareTwoObjects(current_state[y], goal_state[x]):
 				indexesOfElementsToDelete.append(x)
-				print("I have found state from the goal_state which is included in the current_state list! I'm gonna remove it from the goal_state.")
+				# print("I have found state from the goal_state which is included in the current_state list! I'm gonna remove it from the goal_state.")
 
-	print("I should delete ", len(indexesOfElementsToDelete), " states.")
+	# print("I should delete ", len(indexesOfElementsToDelete), " states.")
 	for index in sorted(indexesOfElementsToDelete, reverse=True):
 		del goal_state[index]
 
-	print("There are " + str(len(goal_state)) + " states left in the goal_state list.")
-
+	# print("There are " + str(len(goal_state)) + " states left in the goal_state list.")
 
 '''
 Function: makeSpaceForObjectFromTheGoalState(goal_state, current_state)
 ----------------------------------------------------------------------------------------
-Explanaition blahblahblah
+Example:
+Objects: table1 table2 table3 A B
+Initial state: ON(A,table1) ON(B,table2) CLEAR(table3) HEAVIER(table1,A) HEAVIER(table2,B) HEAVIER(table2,A) HEAVIER(table3,A) HEAVIER(table3,B) CLEAR(A) CLEAR(B)
+Goal state: ON(A,table2)
+
+In this case, our table2 is not clear, thus we cannot create an operator "Move".
+First, we need to find and move object which is on top of table2, to any different place. That's what this function does.
 '''
 def makeSpaceForObjectFromTheGoalState(goal_state, current_state):
 	for x in range(0, len(goal_state)):
 		if goal_state[x].preposition == "ON":
 			for m in range(0, len(current_state)):			
-				if current_state[m].preposition == "CLEAR" and current_state[m].obj1 == goal_state[x].obj2:
-					print("Jest miejsce!")
-				else:													#table2				table2
+				if not (current_state[m].preposition == "CLEAR" and current_state[m].obj1 == goal_state[x].obj2): #If there is no space for some objects
 					if current_state[m].preposition == "ON" and current_state[m].obj2 == goal_state[x].obj2:
-						print("first condition")
 						for k in range(0, len(current_state)):					
 							if current_state[k].preposition == "HEAVIER" and current_state[k].obj2 == current_state[m].obj1:
-								print("second condition")
 								for s in range(0, len(current_state)):
 									if current_state[s].preposition == "CLEAR" and current_state[s].obj1 == current_state[k].obj1:
-										print("third cond")
-										print("Move ", current_state[m].obj1, " from ", current_state[m].obj2, " to ", current_state[s].obj1)
+										print("Move " + current_state[m].obj1 + " " + current_state[m].obj2 + " " + current_state[s].obj1)
 										preconditionProperty1 = Property(current_state[m].preposition, current_state[m].obj1, current_state[m].obj2)
 										preconditionProperty2 = Property(current_state[s].preposition, current_state[s].obj1, "")
 										preconditionProperty3 = Property(current_state[s].preposition, current_state[m].obj1, "")
@@ -257,7 +268,6 @@ The main function is called at the program startup,
 it is the designated entry point to a program that is executed in hosted environment.
 '''
 def main():
-
 	'''
 	Variable: problem
 	----------------------------------------------------------------------------------------
@@ -271,63 +281,56 @@ def main():
 	"operators":[]}
 
 
-
-	'''
-	Temporarily commented - for tests purpose
 	getInputFromUserAndSaveInsideProblemDictionary(problem)
-	'''
 
-	temp_obj = "table1 table2 A"
-	temp_state = "ON(A,table1) HEAVIER(table1,A) HEAVIER(table2,A) CLEAR(A) CLEAR(table2)"
-	temp_goal = "CLEAR(table1) CLEAR(A)"
+	'''
+	During development process, I didn't want to input objects and states every single time I ran the app.
+	If you want to test my app this way, comment line 284, uncomment following 6 lines and insert your test data.
+	
+	temp_obj = "table1 table2 table3 A B"
+	temp_state = "ON(A,table1) ON(B,table2) CLEAR(table3) HEAVIER(table1,A) HEAVIER(table2,B) HEAVIER(table2,A) HEAVIER(table3,A) HEAVIER(table3,B) CLEAR(A) CLEAR(B)"
+	temp_goal = "ON(A,table2)"
 
 	problem['objects'] = temp_obj.split()
 	problem['current_state'] = temp_state.split()
 	problem['goal_state'] = temp_goal.split()
+	'''
+	
 
 	splitInputStringIntoProperties(problem['current_state'])
 	splitInputStringIntoProperties(problem['goal_state'])
 	removeSolvedStatesFromTheGoalState(problem['goal_state'], problem['current_state'])
 	generateOperatorsForCurrentState(problem['objects'], problem['current_state'], problem['operators'], True)
-	#printOperators(problem)
 
 	# Trying to solve all goals - it is not an infinite loop, because we can assume that our problem is solvable
-	# Do while there are states in the goal_state list to be solved - we delete a single state when we solve it
+	# Do while there are states in the goal_state list to be solved - we are deleting a single state when we are solving it
 	while problem['goal_state']:
-		print("There are ", len(problem['operators']), " operators in the list" + "\n")
-		printOperators(problem)
+		# print("There are ", len(problem['operators']), " operators in the list" + "\n")
+		# printOperators(problem)
 		# Searching for operators which may solve the state from the goal_states
-		for x in range(0, len(problem['goal_state'])): #for all goal states
-			for y in range(0, len(problem['operators'])): #look through all operators
-				for z in range(0, len(problem['operators'][y].add)): #and check if its property from add list is equal to property from the goal state
+		for x in range(0, len(problem['goal_state'])): # For all goal states
+			for y in range(0, len(problem['operators'])): # Look through all operators
+				for z in range(0, len(problem['operators'][y].add)): # And check if its property from the add list is equal to the property from the goal state
 					if (problem['operators'][y].add[z].preposition == problem['goal_state'][x].preposition) and (problem['operators'][y].add[z].obj1 == problem['goal_state'][x].obj1) and (problem['operators'][y].add[z].obj2 == problem['goal_state'][x].obj2):
-						print("I have found operator which can solve " + problem['goal_state'][x].preposition + " " + problem['goal_state'][x].obj1 + " " + problem['goal_state'][x].obj2 + " state from the goal_state!")
-						print("To achieve your goals you have to: " + problem['operators'][y].action[0] + " " + problem['operators'][y].action[1] + " " + problem['operators'][y].action[2] + " " + problem['operators'][y].action[3])
-						print("Current state before taking action: ")
-						printCurrentState(problem)
+						# print("I have found operator which can solve " + problem['goal_state'][x].preposition + " " + problem['goal_state'][x].obj1 + " " + problem['goal_state'][x].obj2 + " state from the goal_state!")
+						# print("To achieve your goals you have to: " + problem['operators'][y].action[0] + " " + problem['operators'][y].action[1] + " " + problem['operators'][y].action[2] + " " + problem['operators'][y].action[3])
+						print(problem['operators'][y].action[0] + " " + problem['operators'][y].action[1] + " " + problem['operators'][y].action[2] + " " + problem['operators'][y].action[3])
+						# print("Current state before taking action: ")
+						# printCurrentState(problem)
 						applyOperator(problem['operators'][y], problem['current_state'])
-						print("\nCurrent state after taking action: ")
-						printCurrentState(problem)
-
-						
-					#else:						
-						#print("Still searching...")
+						# print("\nCurrent state after taking action: ")
+						# printCurrentState(problem)
 		generateOperatorsForCurrentState(problem['objects'], problem['current_state'], problem['operators'], True)
 		removeSolvedStatesFromTheGoalState(problem['goal_state'], problem['current_state'])
 
-		if not problem['goal_state']:
+
+		if not problem['goal_state']: # If our goal_state list is empty, we solved every state, program terminates here.
 			break
 		else:
-			print("space space space space")
 			opMove = makeSpaceForObjectFromTheGoalState(problem['goal_state'], problem['current_state'])
 			if(type(opMove) == Operator):
 				applyOperator(opMove, problem['current_state'])
-				printCurrentState(problem)
-
-	
-
-
-
+				# printCurrentState(problem)
 
 if __name__ == "__main__":
 	main()
