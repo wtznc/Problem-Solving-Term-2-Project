@@ -1,6 +1,54 @@
 '''
+	Problem Solving for Computer Science - Assignment
+	Wojciech Tyziniec, student of Computer Science
+	Goldsmiths, University of London 2017
+
+
+	INTRODUCTION
+	----------------------------------------------------------------------------------------
+	Consider a Toy world, containing a finite number n of objects.
+	Each object is specified by a unique name.
+
+	The current state of the world is described using a set of properties which specify
+	the state the objects are in. 
+
+	Only 3 possibly propositions are used to describe the state of the world:
+	- ON(x, y)		- in the current state, object x is on top of object y
+	- CLEAR(x)		- object x is clear, it has nothing on top of it
+	- HEAVIER(x, y)	- object x is heavier than object y
+
+	The current state of the world if specified by a finite sest of "ground instances"
+	of the above propositions - instances obtained by replacing all the variables (x and y)
+	with specific object names. 
+
+	s1 = { 
+			ON(A, table1), 
+			HEAVIER(table1, A), 
+			HEAVIER(table2, A), 
+			CLEAR(A), 
+			CLEAR(table2)} 
+
+	The state above contains 5 propositions involving 3 objects (A, table1, table2).
+	Here s1 describes a state in which object A is clear and is on top of table1, table2 is clear
+	and table1 and table2 are both heavier than A.
+
+	Note that the order of the propositions is irrelevant - a state is a set, not a sequence.
+
+	In this Toy world only 1 action is possible, moving an object from its current location
+	to a different one. This action is described by the "Move" operator below:
+
+	Move(x, y, z):
+		Preconditions: ON(x, y), CLEAR(x), HEAVIER(z, x)
+		Add: ON(x, z), CLEAR(y)
+		Delete: ON(x, y) CLEAR(z)
+
+
+	Move(A, table1, table2) - moves object A from table1 to table2
+'''
+
+'''
 Class: Operator(object)
--------------------------------------------------------------
+----------------------------------------------------------------------------------------
 Stores the details of our operators
 '''
 class Operator(object):
@@ -13,10 +61,11 @@ class Operator(object):
 
 '''
 Class: Property(object)
---------------------------------------------------------------
+----------------------------------------------------------------------------------------
 Class for storing details of prepositions
 Variable 'obj2' is optional. Our operator may require only one operator - e.g. CLEAR(x) vs HEAVIER(x, y). Its default value is set to be - "".
 '''
+
 class Property(object):
 	def __init__(self, preposition, obj1, obj2):
 		self.preposition = preposition
@@ -36,7 +85,7 @@ class Property(object):
 
 '''
 Function: printCurrentState(object):
--------------------------------------------------------------
+----------------------------------------------------------------------------------------
 Helper function which prints out the content of problem['current_state'] list
 '''
 def printCurrentState(object):
@@ -45,8 +94,17 @@ def printCurrentState(object):
 
 
 '''
+Function: printOperators(object):
+----------------------------------------------------------------------------------------
+Helper function which prints out the content of problem['operators'] list
+'''
+def printOperators(object):
+	for x in range(0, len(object['operators'])):
+		print("Operator ",x," = ", object['operators'][x].action)
+
+'''
 Function: splitInputStringIntoProperties(object):
-----------------------------------------------------------------
+----------------------------------------------------------------------------------------
 In this function the object (input from the user) is being parsed and chop up into small objects (Property).
 '''
 def splitInputStringIntoProperties(object):
@@ -69,7 +127,7 @@ def splitInputStringIntoProperties(object):
 
 '''
 Function: getInputFromUserAndSaveInsideProblemDictionary(object)
-------------------------------------------------------------------
+----------------------------------------------------------------------------------------
 I think the function name explains everything.
 '''
 
@@ -88,11 +146,12 @@ def getInputFromUserAndSaveInsideProblemDictionary(object):
 
 '''
 Function: applyOperator(operator, current_state)
--------------------------------------------------------------------
+----------------------------------------------------------------------------------------
 Function performs action of executing operator in the current_state.
 It adds and deletes properties to and from the current_state.
 '''
 def applyOperator(operator, current_state):
+	print("Applying operator: ", operator.action)
 	indexesOfElementsToDelete = []
 	# Adding two properties from the passed operator to the current_state
 	current_state.append(operator.add[0])
@@ -108,13 +167,15 @@ def applyOperator(operator, current_state):
 
 '''
 Function: generateOperatorsForCurrentState(objects, current_state, operators)
----------------------------------------------------------------------
+----------------------------------------------------------------------------------------
 Explanation later...
 '''
-def generateOperatorsForCurrentState(objects, current_state, operators):
+def generateOperatorsForCurrentState(objects, current_state, operators, reset):
+	print("Generating operators...")
 	# Reset current list of operators
-	for z in range(0, len(operators)):
-		del operators[0]
+	if reset == True:
+		for z in range(0, len(operators)):
+			del operators[0]
 
 	for a in range(0, len(objects)):
 		for b in range(0, len(current_state)):
@@ -137,11 +198,9 @@ def generateOperatorsForCurrentState(objects, current_state, operators):
 										operators.append(op)
 										print("Operator added to the list = ", op.action)
 
-
-
 '''
 Function: removeSolvedStatesFromTheGoalState(goal_state, current_state)
------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------
 This function removes states from the goal_state list which are included in the current_state list.
 '''
 def removeSolvedStatesFromTheGoalState(goal_state, current_state):
@@ -160,13 +219,40 @@ def removeSolvedStatesFromTheGoalState(goal_state, current_state):
 	print("There are " + str(len(goal_state)) + " states left in the goal_state list.")
 
 
-
-
-
+'''
+Function: makeSpaceForObjectFromTheGoalState(goal_state, current_state)
+----------------------------------------------------------------------------------------
+Explanaition blahblahblah
+'''
+def makeSpaceForObjectFromTheGoalState(goal_state, current_state):
+	for x in range(0, len(goal_state)):
+		if goal_state[x].preposition == "ON":
+			for m in range(0, len(current_state)):			
+				if current_state[m].preposition == "CLEAR" and current_state[m].obj1 == goal_state[x].obj2:
+					print("Jest miejsce!")
+				else:													#table2				table2
+					if current_state[m].preposition == "ON" and current_state[m].obj2 == goal_state[x].obj2:
+						print("first condition")
+						for k in range(0, len(current_state)):					
+							if current_state[k].preposition == "HEAVIER" and current_state[k].obj2 == current_state[m].obj1:
+								print("second condition")
+								for s in range(0, len(current_state)):
+									if current_state[s].preposition == "CLEAR" and current_state[s].obj1 == current_state[k].obj1:
+										print("third cond")
+										print("Move ", current_state[m].obj1, " from ", current_state[m].obj2, " to ", current_state[s].obj1)
+										preconditionProperty1 = Property(current_state[m].preposition, current_state[m].obj1, current_state[m].obj2)
+										preconditionProperty2 = Property(current_state[s].preposition, current_state[s].obj1, "")
+										preconditionProperty3 = Property(current_state[s].preposition, current_state[m].obj1, "")
+										preconditionProperty4 = Property(current_state[k].preposition, current_state[s].obj1, current_state[m].obj1)
+										op = Operator(["Move", current_state[m].obj1, current_state[m].obj2, current_state[s].obj1],
+											[preconditionProperty1, preconditionProperty2, preconditionProperty3, preconditionProperty4],
+											[Property(current_state[m].preposition, current_state[m].obj1, current_state[s].obj1), Property(current_state[s].preposition, current_state[m].obj2, "")],
+											[Property(current_state[m].preposition, current_state[m].obj1, current_state[m].obj2), Property(current_state[s].preposition, current_state[s].obj1, "")])
+										return op
 
 '''
 Function: main()
------------------------------------------------------------------
+----------------------------------------------------------------------------------------
 The main function is called at the program startup,
 it is the designated entry point to a program that is executed in hosted environment.
 '''
@@ -174,10 +260,9 @@ def main():
 
 	'''
 	Variable: problem
-	--------------------------------------------------
+	----------------------------------------------------------------------------------------
 	The most important variable in this application. 
 	It stores objects, states and operators throughout the execution time.
-
 	'''
 	problem = {
 	"objects": [],
@@ -192,9 +277,9 @@ def main():
 	getInputFromUserAndSaveInsideProblemDictionary(problem)
 	'''
 
-	temp_obj = "table1 table2 A table3 table4 B "
-	temp_state = "ON(A,table1) HEAVIER(table1,A) HEAVIER(table2,A) CLEAR(A) CLEAR(table2) ON(B,table3) HEAVIER(table3,B) HEAVIER(table4,B) CLEAR(B) CLEAR(table4) HEAVIER(table4,A) HEAVIER(table1,B)"
-	temp_goal = "ON(B,table4)"
+	temp_obj = "table1 table2 A"
+	temp_state = "ON(A,table1) HEAVIER(table1,A) HEAVIER(table2,A) CLEAR(A) CLEAR(table2)"
+	temp_goal = "CLEAR(table1) CLEAR(A)"
 
 	problem['objects'] = temp_obj.split()
 	problem['current_state'] = temp_state.split()
@@ -203,13 +288,15 @@ def main():
 	splitInputStringIntoProperties(problem['current_state'])
 	splitInputStringIntoProperties(problem['goal_state'])
 	removeSolvedStatesFromTheGoalState(problem['goal_state'], problem['current_state'])
+	generateOperatorsForCurrentState(problem['objects'], problem['current_state'], problem['operators'], True)
+	#printOperators(problem)
 
-	# Trying to solve all goals
-	# Do while there are states in the goal_state list to be solved
+	# Trying to solve all goals - it is not an infinite loop, because we can assume that our problem is solvable
+	# Do while there are states in the goal_state list to be solved - we delete a single state when we solve it
 	while problem['goal_state']:
-		generateOperatorsForCurrentState(problem['objects'], problem['current_state'], problem['operators'])
-		print("There are ", len(problem['operators']), " operators in the list")
-
+		print("There are ", len(problem['operators']), " operators in the list" + "\n")
+		printOperators(problem)
+		# Searching for operators which may solve the state from the goal_states
 		for x in range(0, len(problem['goal_state'])): #for all goal states
 			for y in range(0, len(problem['operators'])): #look through all operators
 				for z in range(0, len(problem['operators'][y].add)): #and check if its property from add list is equal to property from the goal state
@@ -221,11 +308,23 @@ def main():
 						applyOperator(problem['operators'][y], problem['current_state'])
 						print("\nCurrent state after taking action: ")
 						printCurrentState(problem)
-						removeSolvedStatesFromTheGoalState(problem['goal_state'], problem['current_state'])
-						if(not problem['goal_state']):
-							break
-					else:
-						print("I don't know how to solve it!")
+
+						
+					#else:						
+						#print("Still searching...")
+		generateOperatorsForCurrentState(problem['objects'], problem['current_state'], problem['operators'], True)
+		removeSolvedStatesFromTheGoalState(problem['goal_state'], problem['current_state'])
+
+		if not problem['goal_state']:
+			break
+		else:
+			print("space space space space")
+			opMove = makeSpaceForObjectFromTheGoalState(problem['goal_state'], problem['current_state'])
+			if(type(opMove) == Operator):
+				applyOperator(opMove, problem['current_state'])
+				printCurrentState(problem)
+
+	
 
 
 
