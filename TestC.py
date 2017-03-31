@@ -1,4 +1,55 @@
 '''
+	Problem Solving for Computer Science - Assignment V2
+	Wojciech Tyziniec, student of Computer Science
+	Goldsmiths, University of London 2017
+
+
+	INTRODUCTION
+	----------------------------------------------------------------------------------------
+	Consider a Toy world, containing a finite number n of objects.
+	Each object is specified by a unique name.
+
+	The current state of the world is described using a set of properties which specify
+	the state the objects are in. 
+
+	Only 3 possibly propositions are used to describe the state of the world:
+	- ON(x, y)		- in the current state, object x is on top of object y
+	- CLEAR(x)		- object x is clear, it has nothing on top of it
+	- HEAVIER(x, y)	- object x is heavier than object y
+
+	The current state of the world if specified by a finite sest of "ground instances"
+	of the above propositions - instances obtained by replacing all the variables (x and y)
+	with specific object names. 
+
+	s1 = { 
+			ON(A, table1), 
+			HEAVIER(table1, A), 
+			HEAVIER(table2, A), 
+			CLEAR(A), 
+			CLEAR(table2)} 
+
+	The state above contains 5 propositions involving 3 objects (A, table1, table2).
+	Here s1 describes a state in which object A is clear and is on top of table1, table2 is clear
+	and table1 and table2 are both heavier than A.
+
+	Note that the order of the propositions is irrelevant - a state is a set, not a sequence.
+
+	In this Toy world only 1 action is possible, moving an object from its current location
+	to a different one. This action is described by the "Move" operator below:
+
+	Move(x, y, z):
+		Preconditions: ON(x, y), CLEAR(x), HEAVIER(z, x)
+		Add: ON(x, z), CLEAR(y)
+		Delete: ON(x, y) CLEAR(z)
+
+
+	Move(A, table1, table2) - moves object A from table1 to table2
+
+'''
+
+# Uncomment all  print() commands to turn on a "debugging mode" :).
+
+'''
 Class: Operator(object)
 ----------------------------------------------------------------------------------------
 Stores the details of our operators
@@ -76,7 +127,14 @@ def printCurrentState(object):
 	for x in range(0, len(object['current_state'])):
 		str += object['current_state'][x].preposition + "(" + object['current_state'][x].obj1 + ", " + object['current_state'][x].obj2 + ") "
 	print(str)
+
 def findDifferencesBetweenGoalStateAndCurrentState(goal, current):
+	result = []
+	for x in current:
+		if x not in result:
+			result.append(x)
+	current = result
+
 	counter = 0;
 	goalsToBeSolved = []
 	for x in range(0, len(current)):
@@ -100,23 +158,18 @@ def findDifferencesBetweenGoalStateAndCurrentState(goal, current):
 	return goalsToBeSolved
 
 def addSubgoals(state, current_state, goal_state):
-	#Jezeli chce przeniesc obiekt i on ma cos na sobie
+	# If my object has something on top of it
 	for x in range(0, len(current_state)):
 		if state.obj1 == current_state[x].obj2 and current_state[x].preposition == "ON":
 			print("On top of object " + state.obj1 + " is object " + current_state[x].obj1)
 			goal_state.append(Property("CLEAR", state.obj1, ""))
 			addSubgoals(Property("CLEAR", current_state[x].obj1, ""), current_state, goal_state)
-
+	# If the source place has something on top of it
 	for y in range(0, len(current_state)):
 		if state.obj2 == current_state[y].obj2 and current_state[y].preposition == "ON":
 			print("On top of object " + state.obj2 + " is object " + current_state[y].obj1)
 			goal_state.append(Property("CLEAR", state.obj2, ""))
-		'''
-		if state.obj2 == current_state[x].obj2 and state.obj1 != current_state[x].obj1 and current_state[x].preposition == "ON":
-			print("On top of object " + state.obj2 + " is object " + current_state[x].obj1)
-			goal_state.append(Property("CLEAR", state.obj2, ""))
-			addSubgoals(Property("CLEAR", state.obj2, ""), current_state, goal_state)
-		'''
+			addSubgoals(Property("CLEAR", current_state[y].obj1, ""), current_state, goal_state)
 
 def generateOperatorsForCurrentState(objects, current_state, operators, reset):
 	if reset == True:
@@ -165,17 +218,19 @@ def applyOperator(operator, current_state):
 		del current_state[index]
 
 def removeSolvedStatesFromTheGoalState(goal_state, current_state):
-	print("There are " + str(len(goal_state)) + " states in the goal_state before comparing with current_state")
-	indexesOfElementsToDelete = []
-	for x in range(0, len(goal_state)):
-		for y in range(0, len(current_state)):
-			if compareTwoObjects(current_state[y], goal_state[x]):
-				indexesOfElementsToDelete.append(x)
-				# print("I have found state from the goal_state which is included in the current_state list! I'm gonna remove it from the goal_state.")
+	if goal_state > 0:
+		print("There are " + str(len(goal_state)) + " states in the goal_state before comparing with current_state")
+		indexesOfElementsToDelete = []
+		for x in range(0, len(goal_state)):
+			for y in range(0, len(current_state)):
+				if compareTwoObjects(current_state[y], goal_state[x]):
+					indexesOfElementsToDelete.append(x)
+					print("I have found state from the goal_state which is included in the current_state list! I'm gonna remove it from the goal_state.")
+					break
 
-	print("I should delete ", len(indexesOfElementsToDelete), " states.")
-	for index in sorted(indexesOfElementsToDelete, reverse=True):
-		del goal_state[index]
+		print("I should delete ", len(indexesOfElementsToDelete), " states.")
+		for index in sorted(indexesOfElementsToDelete, reverse=True):
+			del goal_state[index]
 
 def main():
 	'''
@@ -190,10 +245,10 @@ def main():
 		"goal_state": [],
 		"operators": []}
 
-	temp_obj = "A B P1 P2 T1 T2 T3"
-	temp_state = "CLEAR(P2) ON(P2,A) ON(A,T2) ON(T2,B) CLEAR(T1) CLEAR(P1) HEAVIER(A,P2) HEAVIER(T2,A) HEAVIER(B,P2) HEAVIER(P1,P2) HEAVIER(T1,A) HEAVIER(P1,T2)"
+	temp_obj = "A B C D E table1 table2 table3 table4 table5 table6 table7 table8 table9 table10"
+	temp_state = "ON(A,table1) ON(B,table2) ON(C,table3) ON(D,table4) ON(E,table5) CLEAR(A) CLEAR(B) CLEAR(C) CLEAR(D) CLEAR(D) CLEAR(E) HEAVIER(A,table1) HEAVIER(B,table2) HEAVIER(C,table3) HEAVIER(D,table4) HEAVIER(E,table5) CLEAR(table6) CLEAR(table7) HEAVIER(table6,A) HEAVIER(table7,B) CLEAR(table8) CLEAR(table9) CLEAR(table10) HEAVIER(table8,C)"
 	#temp_goal = "CLEAR(P2) ON(P2,A)"
-	temp_goal = "ON(P2,A) ON(A,T2) ON(T2,P1)"
+	temp_goal = "ON(A,table6) ON(B,table7) ON(C,table8)"
 
 	problem['objects'] = temp_obj.split()
 	problem['current_state'] = temp_state.split()
@@ -202,16 +257,16 @@ def main():
 	splitInputStringIntoProperties(problem['current_state'])
 	splitInputStringIntoProperties(problem['goal_state'])
 	printCurrentState(problem)
-	
-	#for x in range(0, len(goalStates)):
-		#print(goalStates[x].preposition + "(" + goalStates[x].obj1 + "," + goalStates[x].obj2 + ")")
+	goalStates = findDifferencesBetweenGoalStateAndCurrentState(problem['goal_state'], problem['current_state'])
 
-	#printCurrentState(problem)
-	while findDifferencesBetweenGoalStateAndCurrentState(problem['goal_state'], problem['current_state']):
+	for x in range(0, len(goalStates)):
+		print(goalStates[x].preposition + "(" + goalStates[x].obj1 + "," + goalStates[x].obj2 + ")")
+
+	printCurrentState(problem)
+	while len(findDifferencesBetweenGoalStateAndCurrentState(problem['goal_state'], problem['current_state'])) > 0:
 		goalStates = findDifferencesBetweenGoalStateAndCurrentState(problem['goal_state'], problem['current_state'])
-		addSubgoals(goalStates[0], problem['current_state'], goalStates)
 
-		while goalStates:
+		while len(goalStates) > 0:
 			if len(goalStates) == 1:
 				addSubgoals(goalStates[0], problem['current_state'], goalStates)
 
@@ -223,12 +278,16 @@ def main():
 							print("I have found operator which can solve " + goalStates[x].preposition + " " + goalStates[x].obj1 + " " + goalStates[x].obj2 + " state from the goal_state!")
 							print("To achieve your goals you have to: " + problem['operators'][y].action[0] + " " + problem['operators'][y].action[1] + " " + problem['operators'][y].action[2] + " " + problem['operators'][y].action[3])
 							applyOperator(problem['operators'][y], problem['current_state'])
-							#print(problem['operators'][y].action[0] + " " + problem['operators'][y].action[1] + " " + problem['operators'][y].action[2] + " " + problem['operators'][y].action[3])
+							print(problem['operators'][y].action[0] + "(" + problem['operators'][y].action[1] + "," + problem['operators'][y].action[2] + "," + problem['operators'][y].action[3]) + ")"
+				generateOperatorsForCurrentState(problem['objects'], problem['current_state'], problem['operators'], True)
+
 			if len(goalStates) > 0:
 				removeSolvedStatesFromTheGoalState(goalStates, problem['current_state'])
 
-		#for x in range(0, len(goalStates)):
-			#print(goalStates[x].preposition + "(" + goalStates[x].obj1 + "," + goalStates[x].obj2 + ")")
+
+		for x in range(0, len(goalStates)):
+			print(goalStates[x].preposition + "(" + goalStates[x].obj1 + "," + goalStates[x].obj2 + ")")
+
 
 	printCurrentState(problem)
 if __name__ == "__main__":
